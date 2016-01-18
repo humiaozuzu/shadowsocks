@@ -290,9 +290,10 @@ class TCPRelayHandler(object):
             if header_result is None:
                 raise Exception('can not parse header')
             addrtype, remote_addr, remote_port, header_length = header_result
-            logging.info('connecting %s:%d from %s:%d' %
+            logging.info('connecting %s:%d from %s:%d via %d' %
                          (common.to_str(remote_addr), remote_port,
-                          self._client_address[0], self._client_address[1]))
+                          self._client_address[0], self._client_address[1],
+                          self._server._config['server_port']))
             self._remote_address = (common.to_str(remote_addr), remote_port)
             # pause reading
             self._update_stream(STREAM_UP, WAIT_STATUS_WRITING)
@@ -511,8 +512,8 @@ class TCPRelayHandler(object):
             logging.warn('unknown socket')
 
     def _log_error(self, e):
-        logging.error('%s when handling connection from %s:%d' %
-                      (e, self._client_address[0], self._client_address[1]))
+        logging.error('%s when handling connection from %s:%d via %s' %
+                      (e, self._client_address[0], self._client_address[1], self._server._config['server_port']))
 
     def destroy(self):
         # destroy the handler and release any resources
@@ -642,8 +643,8 @@ class TCPRelay(object):
                         break
                     else:
                         if handler.remote_address:
-                            logging.warn('timed out: %s:%d' %
-                                         handler.remote_address)
+                            logging.warn('timed out: %s:%d via %d' %
+                                         (handler.remote_address[0], handler.remote_address[1], self._config['server_port']))
                         else:
                             logging.warn('timed out')
                         handler.destroy()
