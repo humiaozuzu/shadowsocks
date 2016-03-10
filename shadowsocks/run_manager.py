@@ -19,16 +19,34 @@ import sys
 import os
 import logging
 import time
+import getopt
+import imp
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../'))
 from shadowsocks import manager
-import config
-
 
 def handler_SIGQUIT():
     return
 
 def main():
+    shortopts = 'hc:'
+    longopts = ['help', 'config']
+    optlist, args = getopt.getopt(sys.argv[1:], shortopts, longopts)
+
+    config_path = None
+    for o, a in optlist:
+        if o in ('-h', '--help'):
+            print 'Usage: run_manager -c path_to_config.py'
+            sys.exit(0)
+        elif o in ('-c', '--config'):
+            config_path = a
+
+    if not config_path:
+        print 'config not specified'
+        sys.exit(2)
+
+    config = imp.load_source('config', config_path)
+
     level = config.LOG_LEVEL
     logging.basicConfig(level=level,
                         format='%(asctime)s %(levelname)-8s %(message)s',
