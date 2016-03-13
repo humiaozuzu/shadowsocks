@@ -4,11 +4,10 @@
 import logging
 import cymysql
 import time
-import sys
 import socket
-import config
 import json
 
+config = None
 
 class DbTransfer(object):
 
@@ -120,7 +119,9 @@ class DbTransfer(object):
                     print('add: {"server_port": %s, "password":"%s"}'% (row[0], row[4]))
 
     @staticmethod
-    def thread_db():
+    def thread_db(conf):
+        global config
+        config = conf
         import socket
         import time
         timeout = 30

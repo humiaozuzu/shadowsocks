@@ -53,7 +53,7 @@ def main():
                         datefmt='%Y-%m-%d %H:%M:%S')
 
     time.sleep(1)
-    DbTransfer.thread_db()
+    DbTransfer.thread_db(config)
 
     while True:
         time.sleep(100)
