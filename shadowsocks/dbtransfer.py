@@ -62,7 +62,7 @@ class DbTransfer(object):
         last_time = time.time()
         for id in dt_transfer.keys():
             query_sub_when += ' WHEN %s THEN u+%s' % (id, 0) # all in d
-            query_sub_when2 += ' WHEN %s THEN d+%s' % (id, dt_transfer[id])
+            query_sub_when2 += ' WHEN %s THEN d+%s' % (id, int(dt_transfer[id] * config.TRANSFER_RATIO))
             if query_sub_in is not None:
                 query_sub_in += ',%s' % id
             else:
