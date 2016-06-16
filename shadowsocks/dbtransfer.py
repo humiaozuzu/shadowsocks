@@ -137,7 +137,7 @@ class DbTransfer(object):
                 traceback.print_exc()
                 logging.warn('db thread except:%s' % e)
             finally:
-                time.sleep(30)
+                time.sleep(60)
 
 
 #SQLData.pull_db_all_user()
