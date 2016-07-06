@@ -76,23 +76,27 @@ class DbTransfer(object):
         # print query_sql
         conn = cymysql.connect(host=config.MYSQL_HOST, port=config.MYSQL_PORT, user=config.MYSQL_USER,
                                passwd=config.MYSQL_PASS, db=config.MYSQL_DB, charset='utf8')
-        cur = conn.cursor()
-        cur.execute(query_sql)
-        cur.close()
-        conn.commit()
-        conn.close()
+        try:
+            cur = conn.cursor()
+            cur.execute(query_sql)
+            cur.close()
+            conn.commit()
+        finally:
+            conn.close()
 
     @staticmethod
     def pull_db_all_user():
         conn = cymysql.connect(host=config.MYSQL_HOST, port=config.MYSQL_PORT, user=config.MYSQL_USER,
                                passwd=config.MYSQL_PASS, db=config.MYSQL_DB, charset='utf8')
-        cur = conn.cursor()
-        cur.execute("SELECT port, u, d, transfer_enable, passwd, switch, enable FROM user")
-        rows = []
-        for r in cur.fetchall():
-            rows.append(list(r))
-        cur.close()
-        conn.close()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT port, u, d, transfer_enable, passwd, switch, enable FROM user")
+            rows = []
+            for r in cur.fetchall():
+                rows.append(list(r))
+            cur.close()
+        finally:
+            conn.close()
         return rows
 
     @staticmethod
