@@ -122,6 +122,8 @@ class Manager(object):
                 a_config = self._config.copy()
                 if command == 'transfer':
                     self.handle_periodic()
+                elif command == 'ports':
+                    self.get_all_ports()
                 else:
                     if config:
                         # let the command override the configuration file
@@ -160,6 +162,31 @@ class Manager(object):
 
     def stat_callback(self, port, data_len):
         self._statistics[port] += data_len
+
+    def get_all_ports(self):
+        # data = common.to_bytes(json.dumps(self._relays.keys(), separators=(',', ':')))
+        # self._send_control_data(data)
+        r = []
+        i = 0
+
+        def send_data(data_list):
+            if data_list:
+                # use compact JSON format (without space)
+                data = common.to_bytes(json.dumps(data_list,
+                                                  separators=(',', ':')))
+                self._send_control_data(data)
+
+        for port in self._relays.keys():
+            r.append(port)
+            i += 1
+            # split the data into segments that fit in UDP packets
+            if i >= 100:
+                send_data(r)
+                del r[:]
+                i = 0
+        if len(r) > 0:
+            send_data(r)
+        self._send_control_data('e')
 
     def handle_periodic(self):
         r = {}
