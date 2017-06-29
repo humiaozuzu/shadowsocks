@@ -8,7 +8,7 @@ import json
 import urllib2
 import json
 import gzip
-import StringIO
+from StringIO import StringIO
 from urllib import urlencode
 from raven import Client
 
