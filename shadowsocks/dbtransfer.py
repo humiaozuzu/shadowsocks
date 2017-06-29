@@ -87,8 +87,16 @@ class DbTransfer(object):
                 raise RuntimeError(json.load(resp))
 
     def pull_db_all_user(self):
-        resp = urllib2.urlopen(config.SYNC_API_URL + '/v1/sync/users', "token=%s" % config.SYNC_TOKEN)
-        data = json.load(resp)
+        req = urllib2.Request(config.SYNC_API_URL + '/v1/sync/users', "token=%s" % config.SYNC_TOKEN)
+        req.add_header('Accept-encoding', 'gzip')
+        resp = urllib2.urlopen(req)
+        if resp.info().get('Content-Encoding') == 'gzip':
+            buf = StringIO(resp.read())
+            f = gzip.GzipFile(fileobj=resp)
+            resp_data = f.read()
+            data = json.load(resp_data)
+        else:
+            data = json.load(resp)
         traffic_ok_users = data['traffic_ok']
         traffic_exceed_users = data['traffic_exceed']
         r_ports = [user[1] for user in traffic_ok_users] + [user[1] for user in traffic_exceed_users]
