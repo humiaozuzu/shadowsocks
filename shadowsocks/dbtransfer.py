@@ -94,7 +94,7 @@ class DbTransfer(object):
         resp = urllib2.urlopen(req)
         if resp.info().get('Content-Encoding') == 'gzip':
             buf = StringIO(resp.read())
-            f = gzip.GzipFile(fileobj=resp)
+            f = gzip.GzipFile(fileobj=buf)
             resp_data = f.read()
             data = json.load(resp_data)
         else:
