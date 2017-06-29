@@ -95,8 +95,7 @@ class DbTransfer(object):
         if resp.info().get('Content-Encoding') == 'gzip':
             buf = StringIO(resp.read())
             f = gzip.GzipFile(fileobj=buf)
-            resp_data = f.read()
-            data = json.load(resp_data)
+            data = json.load(f)
         else:
             data = json.load(resp)
         traffic_ok_users = data['traffic_ok']
