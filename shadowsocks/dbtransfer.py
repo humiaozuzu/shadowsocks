@@ -8,6 +8,7 @@ import json
 import urllib2
 import json
 from urllib import urlencode
+from raven import Client
 
 config = None
 
@@ -27,14 +28,13 @@ class DbTransfer(object):
     @staticmethod
     def send_command(cmd):
         data = ''
-        try:
-            cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            cli.settimeout(1)
-            cli.sendto(cmd, ('%s' % (config.MANAGE_BIND_IP), config.MANAGE_PORT))
-            data, addr = cli.recvfrom(1500)
-            cli.close()
-        except:
-            logging.warn('send_command response')
+
+        cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        cli.settimeout(1)
+        cli.sendto(cmd, ('%s' % (config.MANAGE_BIND_IP), config.MANAGE_PORT))
+        data, addr = cli.recvfrom(1500)
+        cli.close()
+
         return data
 
     @staticmethod
@@ -134,6 +134,8 @@ class DbTransfer(object):
         import time
         timeout = 30
         socket.setdefaulttimeout(timeout)
+        if config.SENTRY_DSN:
+            client = Client(config.SENTRY_DSN)
         while True:
             logging.info('db loop')
             try:
@@ -143,6 +145,8 @@ class DbTransfer(object):
                 import traceback
                 traceback.print_exc()
                 logging.warn('db thread except:%s' % e)
+                if config.SENTRY_DSN:
+                    client.captureException()
             finally:
                 time.sleep(60)
 
