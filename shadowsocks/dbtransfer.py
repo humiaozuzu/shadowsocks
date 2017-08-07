@@ -89,7 +89,7 @@ class DbTransfer(object):
                 raise RuntimeError(json.load(resp))
 
     def pull_db_all_user(self):
-        req = urllib2.Request(config.SYNC_API_URL + '/v1/sync/users', "token=%s" % config.SYNC_TOKEN)
+        req = urllib2.Request(config.SYNC_API_URL + '/v1/sync/ss_users', "token=%s" % config.SYNC_TOKEN)
         req.add_header('Accept-encoding', 'gzip')
         resp = urllib2.urlopen(req)
         if resp.info().get('Content-Encoding') == 'gzip':
