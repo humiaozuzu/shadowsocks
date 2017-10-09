@@ -551,7 +551,7 @@ class TCPRelayHandler(object):
             del self._fd_to_handlers[self._local_sock.fileno()]
             if set_so_mark:
                 self._local_sock.setsockopt(socket.SOL_SOCKET, 36, 100)
-                logging.info('setting so_mark done!')
+                logging.warn('setting so_mark done!')
             self._local_sock.close()
             self._local_sock = None
         self._dns_resolver.remove_callback(self._handle_dns_resolved)
