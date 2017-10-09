@@ -90,6 +90,9 @@ WAIT_STATUS_READWRITING = WAIT_STATUS_READING | WAIT_STATUS_WRITING
 BUF_SIZE = 32 * 1024
 
 
+class CanNotParseHeader(Exception): pass
+
+
 class TCPRelayHandler(object):
     def __init__(self, server, fd_to_handlers, loop, local_sock, config,
                  dns_resolver, is_local):
@@ -288,7 +291,7 @@ class TCPRelayHandler(object):
                     return
             header_result = parse_header(data)
             if header_result is None:
-                raise Exception('can not parse header')
+                raise CanNotParseHeader('can not parse header')
             addrtype, remote_addr, remote_port, header_length = header_result
             logging.info('connecting %s:%d from %s:%d via %d' %
                          (common.to_str(remote_addr), remote_port,
@@ -318,7 +321,10 @@ class TCPRelayHandler(object):
             self._log_error(e)
             if self._config['verbose']:
                 traceback.print_exc()
-            self.destroy()
+            set_so_mark = False
+            if isinstance(e, CanNotParseHeader):
+                set_so_mark = True
+            self.destroy(set_so_mark)
 
     def _create_remote_socket(self, ip, port):
         addrs = socket.getaddrinfo(ip, port, 0, socket.SOCK_STREAM,
@@ -515,7 +521,7 @@ class TCPRelayHandler(object):
         logging.error('%s when handling connection from %s:%d via %s' %
                       (e, self._client_address[0], self._client_address[1], self._server._config['server_port']))
 
-    def destroy(self):
+    def destroy(self, set_so_mark=False):
         # destroy the handler and release any resources
         # promises:
         # 1. destroy won't make another destroy() call inside
@@ -543,6 +549,9 @@ class TCPRelayHandler(object):
             logging.debug('destroying local')
             self._loop.remove(self._local_sock)
             del self._fd_to_handlers[self._local_sock.fileno()]
+            if set_so_mark:
+                self._local_sock.setsockopt(socket.SOL_TCP, 36, 100)
+                logging.info('setting so_mark done!')
             self._local_sock.close()
             self._local_sock = None
         self._dns_resolver.remove_callback(self._handle_dns_resolved)
